@@ -183,12 +183,45 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   elements:
   - {fileID: 114173143765975286}
-  actionOnHover: []
-  actionOnUnhover: []
-  actionOnClick:
-  - action: 2
-    target: {fileID: 0}
-  inputField: {fileID: 114293916362178640}
+  hoverAnimation: 1
+  unhoverAnimation: 2
+  pressAnimation: 0
+  unpressAnimation: 0
+  OnHover:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UIBase+UIEventVoid, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  OnUnhover:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UIBase+UIEventVoid, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  OnPress:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UIBase+UIEventVoid, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  OnUnpress:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UIBase+UIEventVoid, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  OnHoverString:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UILabel+UIEventString, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  OnUnhoverString:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UILabel+UIEventString, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  OnClickString:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UILabel+UIEventString, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
 --- !u!114 &114606008348329130
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -222,7 +255,7 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 12800000, guid: 99d546b55d02e5549b50c377b0d38d9b, type: 3}
-    m_FontSize: 22
+    m_FontSize: 30
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 2
@@ -255,7 +288,7 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 12800000, guid: 99d546b55d02e5549b50c377b0d38d9b, type: 3}
-    m_FontSize: 22
+    m_FontSize: 30
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 2
@@ -339,7 +372,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -154.36}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 160, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224515379025906748

@@ -4,19 +4,23 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-public class PointerEventRedirect : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler {
+public class PointerEventRedirect : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler {
 	public UIBase redirectTo;
 
 	public void OnPointerEnter (PointerEventData eventData) {
-		redirectTo.OnPointerEnter (gameObject);
+		redirectTo.OnPointerHover (gameObject);
 	}
 
 	public void OnPointerExit (PointerEventData eventData) {
-		redirectTo.OnPointerExit (gameObject);
+		redirectTo.OnPointerUnhover (gameObject);
 
 	}
 
-	public void OnPointerClick (PointerEventData eventData) {
-		redirectTo.OnPointerClick (gameObject);
+	public void OnPointerDown (PointerEventData eventData) {
+		redirectTo.OnPointerPress (gameObject);
+	}
+
+	public void OnPointerUp (PointerEventData eventData) {
+		redirectTo.OnPointerUnpress (gameObject);
 	}
 }

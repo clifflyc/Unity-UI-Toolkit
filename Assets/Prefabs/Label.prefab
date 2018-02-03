@@ -55,7 +55,6 @@ GameObject:
   - component: {fileID: 224284850672856354}
   - component: {fileID: 222140289854704862}
   - component: {fileID: 114823676969204578}
-  - component: {fileID: 114455052615742004}
   m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
@@ -63,18 +62,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &114455052615742004
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1753228335800672}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b18a47d3b26315c4ca0816eff525bbf5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  redirectTo: {fileID: 114459799509433280}
 --- !u!114 &114459799509433280
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -89,9 +76,45 @@ MonoBehaviour:
   elements:
   - {fileID: 114526268856058046}
   - {fileID: 114823676969204578}
-  actionOnHover: []
-  actionOnUnhover: []
-  actionOnClick: []
+  hoverAnimation: 0
+  unhoverAnimation: 0
+  pressAnimation: 0
+  unpressAnimation: 0
+  OnHover:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UIBase+UIEventVoid, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  OnUnhover:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UIBase+UIEventVoid, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  OnPress:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UIBase+UIEventVoid, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  OnUnpress:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UIBase+UIEventVoid, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  OnHoverString:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UILabel+UIEventString, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  OnUnhoverString:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UILabel+UIEventString, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  OnClickString:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UILabel+UIEventString, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
 --- !u!114 &114526268856058046
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -132,7 +155,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 0.2647059, g: 0.2647059, b: 0.2647059, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -140,10 +163,10 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 12800000, guid: 99d546b55d02e5549b50c377b0d38d9b, type: 3}
-    m_FontSize: 22
+    m_FontSize: 30
     m_FontStyle: 0
     m_BestFit: 0
-    m_MinSize: 2
+    m_MinSize: 0
     m_MaxSize: 40
     m_Alignment: 4
     m_AlignByGeometry: 0

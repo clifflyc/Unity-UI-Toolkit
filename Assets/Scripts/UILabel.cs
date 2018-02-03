@@ -32,25 +32,25 @@ public class UILabel : UIBase {
 		stringElement = s;
 	}
 
-	public override void OnPointerEnter (GameObject source) {
-		base.OnPointerEnter (source);
-		if (!animating && !hidden) {
+	public override void OnPointerHover (GameObject source) {
+		base.OnPointerHover (source);
+		if (!hidden) {
 			OnHoverString.Invoke (stringElement);
 		}
 	}
 
 
-	public override void OnPointerExit (GameObject source) {
-		base.OnPointerExit (source);
-		if (!animating && !hidden) {
+	public override void OnPointerUnhover (GameObject source) {
+		base.OnPointerUnhover (source);
+		if (!hidden) {
 			OnUnhoverString.Invoke (stringElement);
 
 		}
 	}
 
-	public override void OnPointerClick (GameObject source) {
-		base.OnPointerClick (source);
-		if (!animating && !hidden) {
+	public override void OnPointerPress (GameObject source) {
+		base.OnPointerPress (source);
+		if (!hidden) {
 			OnClickString.Invoke (stringElement);
 		}
 	}
