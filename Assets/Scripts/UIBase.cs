@@ -2,22 +2,32 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
 public class UIBase : MonoBehaviour {
+
+	[System.Serializable]
+	public class UIEventVoid:UnityEvent {
+
+	}
+
 	const float AnimationDuration = 0.2f;
 	static List<UIBase> animatingElements = new List<UIBase> ();
-	static bool allowNewAnimations = true;
 
 	public Graphic[] elements;
-	//	public Image background;
+	public UIEventVoid OnHover;
+	public UIEventVoid OnUnhover;
+	public UIEventVoid OnClick;
 
 	Vector3[] originalLocations;
 	AnimationCurve animationCurve;
-	bool hidden = false;
+	protected bool hidden = false;
+	protected bool animating = false;
 	//TODO start as hidden?
+	//TODO queue animations?
 
-	void Start () {
+	protected virtual void Start () {
 		originalLocations = new Vector3[elements.Length];
 		for (int i = 0; i < elements.Length; i++) {
 			originalLocations [i] = elements [i].transform.localPosition;
@@ -35,30 +45,12 @@ public class UIBase : MonoBehaviour {
 		}
 	}
 
-	void StartAnimating () {
-		allowNewAnimations = false;
-		if (animatingElements.Contains (this)) {
-			Debug.LogWarning ("Double animating on " + name);
-		} else {
-			animatingElements.Add (this);
-		}
-	}
+	//---------------------//
 
-	void StopAnimating () {
-		if (animatingElements.Contains (this)) {
-			animatingElements.Remove (this);
-			if (animatingElements.Count == 0) {
-				allowNewAnimations = true;
-			}
-		} else {
-			Debug.LogWarning ("Zero animating on " + name);
-		}
-	}
-
-	public void OnPointerEnter (GameObject source) {
-		if (allowNewAnimations && !hidden) {
+	public virtual void OnPointerEnter (GameObject source) {
+		if (!animating && !hidden) {
+			OnHover.Invoke ();
 			StartCoroutine (_OnPointerEnter ());
-
 		}
 	}
 
@@ -69,8 +61,9 @@ public class UIBase : MonoBehaviour {
 		yield return null;
 	}
 
-	public void OnPointerExit (GameObject source) {
-		if (allowNewAnimations && !hidden) {
+	public virtual void OnPointerExit (GameObject source) {
+		if (!animating && !hidden) {
+			OnUnhover.Invoke ();
 			StartCoroutine (_OnPointerExit ());
 		}
 	}
@@ -82,8 +75,9 @@ public class UIBase : MonoBehaviour {
 		yield return null;
 	}
 
-	public void OnPointerClick (GameObject source) {
-		if (allowNewAnimations && !hidden) {
+	public virtual void OnPointerClick (GameObject source) {
+		if (!animating && !hidden) {
+			OnClick.Invoke ();
 			StartCoroutine (_OnPointerClick ());
 		}
 	}
@@ -107,8 +101,29 @@ public class UIBase : MonoBehaviour {
 		SetElementsOffset (Vector3.zero);
 	}
 
+
+	//----------------------//
+
+	void StartAnimating () {
+		animating = true;
+		if (animatingElements.Contains (this)) {
+			Debug.LogWarning ("Double animating on " + name);
+		} else {
+			animatingElements.Add (this);
+		}
+	}
+
+	void StopAnimating () {
+		animating = false;
+		if (animatingElements.Contains (this)) {
+			animatingElements.Remove (this);
+		} else {
+			Debug.LogWarning ("Zero animating on " + name);
+		}
+	}
+
 	public void Show () {
-		if (allowNewAnimations) {
+		if (!animating) {
 			foreach (UIBase element in GetComponentsInChildren<UIBase>()) {
 				element.StartCoroutine (element._Show ());
 			}
@@ -134,7 +149,7 @@ public class UIBase : MonoBehaviour {
 	}
 
 	public void Hide () {
-		if (allowNewAnimations) {
+		if (!animating) {
 			foreach (UIBase element in GetComponentsInChildren<UIBase>()) {
 				element.StartCoroutine (element._Hide ());
 			}
@@ -172,4 +187,5 @@ public class UIBase : MonoBehaviour {
 			elements [i].transform.localPosition = originalLocations [i] + offset;
 		}
 	}
+
 }
