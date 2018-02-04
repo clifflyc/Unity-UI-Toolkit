@@ -13,17 +13,22 @@ public class UILabel : UIBase {
 
 	public UIEventString OnHoverString;
 	public UIEventString OnUnhoverString;
-	public UIEventString OnClickString;
+	public UIEventString OnPressString;
+	public UIEventString OnUnpressString;
 
 	Text label;
 
-	protected virtual string stringElement { get { return label.text; } set { label.text = value; } }
+	public virtual string stringElement { get { return label.text; } set { label.text = value; } }
 
 	protected override void Start () {
 		base.Start ();
-		foreach (Graphic graphic in elements) {
+		foreach (Graphic graphic in graphicElements) {
 			if (graphic is Text) {
+				if (label) {
+					Debug.LogWarning ("Don't put multiple Texts on a single UILabel");
+				}
 				label = (Text)graphic;
+				break;
 			}
 		}
 	}
@@ -51,7 +56,14 @@ public class UILabel : UIBase {
 	public override void OnPointerPress (GameObject source) {
 		base.OnPointerPress (source);
 		if (!hidden) {
-			OnClickString.Invoke (stringElement);
+			OnPressString.Invoke (stringElement);
+		}
+	}
+
+	public override void OnPointerUnpress (GameObject source) {
+		base.OnPointerUnpress (source);
+		if (!hidden) {
+			OnUnpressString.Invoke (stringElement);
 		}
 	}
 }

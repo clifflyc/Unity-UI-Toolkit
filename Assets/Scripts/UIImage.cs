@@ -11,8 +11,11 @@ public class UIImage : UIBase {
 
 	protected override void Start () {
 		base.Start ();
-		foreach (Graphic graphic in elements) {
+		foreach (Graphic graphic in graphicElements) {
 			if (graphic is Image) {
+				if (image) {
+					Debug.LogWarning ("Don't put multiple Images on a single UIImage");
+				}
 				image = (Image)graphic;
 			}
 		}

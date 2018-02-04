@@ -68,12 +68,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0dc7c4a7c7717b409db4f588549878c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  elements:
+  graphicElements:
   - {fileID: 114923541661125554}
-  hoverAnimation: 1
-  unhoverAnimation: 2
-  pressAnimation: 3
-  unpressAnimation: 4
+  transformableElements:
+  - {fileID: 224892454915019010}
+  hoverAnimation: 0
+  unhoverAnimation: 0
+  pressAnimation: 0
+  unpressAnimation: 0
   OnHover:
     m_PersistentCalls:
       m_Calls: []

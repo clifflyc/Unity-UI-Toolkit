@@ -7,10 +7,16 @@ using UnityEngine.EventSystems;
 
 public class UIBase : MonoBehaviour {
 
-	public Graphic[] elements;
+	public bool startHidden;
+	public Graphic[] graphicElements;
+	public RectTransform[] transformableElements;
 	
 
 	// aniamtions
+	protected const float AnimationDuration = 0.15f;
+	protected const float AnimationDistance = 10f;
+	static AnimationCurve animationCurve = AnimationCurve.EaseInOut (0, 0, 1, 1);
+
 	public enum UICommonAnimation {
 		None,
 		LowerAlpha,
@@ -21,13 +27,17 @@ public class UIBase : MonoBehaviour {
 		Unenlarge
 	}
 
-	const float AnimationDuration = 0.2f;
-	const float AnimationDistance = 10f;
-
 	public UICommonAnimation hoverAnimation;
 	public UICommonAnimation unhoverAnimation;
 	public UICommonAnimation pressAnimation;
 	public UICommonAnimation unpressAnimation;
+
+	Queue<IEnumerator> animationQueue = new Queue<IEnumerator> ();
+	bool animationQueueWorkerAlive = false;
+
+	bool[] graphicsElementsRaycastTargetable;
+	Vector3[] transformableElementsOriginalLocations;
+
 
 	// events
 	[System.Serializable]
@@ -40,22 +50,24 @@ public class UIBase : MonoBehaviour {
 	public UIEventVoid OnPress;
 	public UIEventVoid OnUnpress;
 
-	Vector3[] originalLocations;
-	AnimationCurve animationCurve = AnimationCurve.EaseInOut (0, 0, 1, 1);
-
 	protected bool hidden = false;
 
-	Queue<IEnumerator> animationQueue = new Queue<IEnumerator> ();
-	bool animationQueueWorkerAlive = false;
-
-	protected bool animating { get { return animationQueue.Count == 0; } }
-
-	//TODO start as hidden?
+	protected virtual void Awake () {
+		graphicsElementsRaycastTargetable = new bool[graphicElements.Length];
+		for (int i = 0; i < graphicElements.Length; i++) {
+			graphicsElementsRaycastTargetable [i] = graphicElements [i].raycastTarget;
+		}
+		transformableElementsOriginalLocations = new Vector3[transformableElements.Length];
+		for (int i = 0; i < transformableElements.Length; i++) {
+			transformableElementsOriginalLocations [i] = transformableElements [i].transform.localPosition;
+		}
+	}
 
 	protected virtual void Start () {
-		originalLocations = new Vector3[elements.Length];
-		for (int i = 0; i < elements.Length; i++) {
-			originalLocations [i] = elements [i].transform.localPosition;
+		if (startHidden) {
+			foreach (UIBase element in GetComponentsInChildren<UIBase>()) {
+				element.HideImmediately ();
+			}
 		}
 	}
 
@@ -132,28 +144,36 @@ public class UIBase : MonoBehaviour {
 
 	public void Show () {
 		foreach (UIBase element in GetComponentsInChildren<UIBase>()) {
-			element.QueueAnimation (element._Show ());
+			if (!element.startHidden || element == this) {
+				element.StartCoroutine (element._Show ());
+			}
 		}
 	}
 
 	IEnumerator _Show () {
+		SetElementsScale (1);
 		yield return A_RiseIn ();
 		hidden = false;
+		SetElementsRaycastTargetable (true);
 	}
 
 	public void Hide () {
 		foreach (UIBase element in GetComponentsInChildren<UIBase>()) {
-			element.QueueAnimation (element._Hide ());
+			element.StartCoroutine (element._Hide ());
 		}
 	}
 
-
-	IEnumerator _Hide () {
-		yield return A_FallOut ();
+	void HideImmediately () {
+		SetElementsRaycastTargetable (false);
+		SetElementsAlpha (0);
 		hidden = true;
 	}
 
-	//---------------------//
+	IEnumerator _Hide () {
+		hidden = true;
+		SetElementsRaycastTargetable (false);
+		yield return A_FallOut ();
+	}
 
 	IEnumerator A_RiseIn () {
 		float lifetime = 0;
@@ -181,6 +201,8 @@ public class UIBase : MonoBehaviour {
 		SetElementsAlpha (0);
 	}
 
+	//---------------------//
+
 	IEnumerator A_BounceDown () {
 		float lifetime = 0;
 		while (lifetime < AnimationDuration) {
@@ -207,18 +229,18 @@ public class UIBase : MonoBehaviour {
 		float lifetime = 0;
 		while (lifetime < AnimationDuration) {
 			float frac = animationCurve.Evaluate (lifetime / AnimationDuration);
-			SetElementsAlpha (1 - 0.1f * frac);
+			SetElementsAlpha (1 - 0.2f * frac);
 			yield return null;
 			lifetime += Time.deltaTime;
 		}
-		SetElementsAlpha (0.9f);
+		SetElementsAlpha (0.8f);
 	}
 
 	IEnumerator A_RaiseAlpha () {
 		float lifetime = 0;
 		while (lifetime < AnimationDuration) {
 			float frac = animationCurve.Evaluate (lifetime / AnimationDuration);
-			SetElementsAlpha (0.9f + 0.1f * frac);
+			SetElementsAlpha (0.8f + 0.2f * frac);
 			yield return null;
 			lifetime += Time.deltaTime;
 		}
@@ -264,27 +286,35 @@ public class UIBase : MonoBehaviour {
 
 	IEnumerator AnimationQueueWorker () {
 		animationQueueWorkerAlive = true;
-		while (animationQueue.Count > 0) {
+		while (animationQueue.Count > 0 && !hidden) {
 			yield return animationQueue.Dequeue ();
 		}
 		animationQueueWorkerAlive = false;
 	}
 
 	protected void SetElementsAlpha (float alpha) {
-		for (int i = 0; i < elements.Length; i++) {
-			elements [i].CrossFadeAlpha (alpha, 0, true);
+		for (int i = 0; i < graphicElements.Length; i++) {
+			graphicElements [i].CrossFadeAlpha (alpha, 0, true);
+		}
+	}
+
+	protected void SetElementsRaycastTargetable (bool targetable) {
+		for (int i = 0; i < graphicElements.Length; i++) {
+			if (graphicsElementsRaycastTargetable [i]) {
+				graphicElements [i].raycastTarget = targetable;
+			}
 		}
 	}
 
 	protected void SetElementsScale (float scale) {
-		for (int i = 0; i < elements.Length; i++) {
-			elements [i].transform.localScale = new Vector3 (scale, scale, scale);
+		for (int i = 0; i < transformableElements.Length; i++) {
+			transformableElements [i].transform.localScale = new Vector3 (scale, scale, scale);
 		}
 	}
 
 	protected void SetElementsOffset (Vector3 offset) {
-		for (int i = 0; i < elements.Length; i++) {
-			elements [i].transform.localPosition = originalLocations [i] + offset;
+		for (int i = 0; i < transformableElements.Length; i++) {
+			transformableElements [i].transform.localPosition = transformableElementsOriginalLocations [i] + offset;
 		}
 	}
 

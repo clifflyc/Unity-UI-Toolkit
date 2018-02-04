@@ -8,13 +8,16 @@ public class UIInput : UILabel {
 	
 	InputField inputField;
 
-	protected override string stringElement { get { return inputField.text; } set { inputField.text = value; } }
+	public override string stringElement { get { return inputField.text; } set { inputField.text = value; } }
 
 	protected override void Start () {
 		base.Start ();
-		foreach (Graphic graphic in elements) {
+		foreach (Graphic graphic in graphicElements) {
 			InputField inputField = graphic.GetComponent<InputField> ();
 			if (inputField) {
+				if (this.inputField) {
+					Debug.LogWarning ("Don't put multiple InputFields on a single UIInput");
+				}
 				this.inputField = inputField;
 			}
 		}
