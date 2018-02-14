@@ -38,7 +38,7 @@ GameObject:
   - component: {fileID: 224296126251135880}
   - component: {fileID: 114572681033824772}
   m_Layer: 5
-  m_Name: Input
+  m_Name: Input - Copy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

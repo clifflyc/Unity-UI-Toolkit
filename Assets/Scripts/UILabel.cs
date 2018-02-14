@@ -20,8 +20,8 @@ public class UILabel : UIBase {
 
 	public virtual string stringElement { get { return label.text; } set { label.text = value; } }
 
-	protected override void Start () {
-		base.Start ();
+	protected override void Awake () {
+		base.Awake ();
 		foreach (Graphic graphic in graphicElements) {
 			if (graphic is Text) {
 				if (label) {

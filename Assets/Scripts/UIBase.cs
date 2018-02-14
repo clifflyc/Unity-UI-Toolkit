@@ -24,13 +24,23 @@ public class UIBase : MonoBehaviour {
 		BounceUp,
 		BounceDown,
 		Enlarge,
-		Unenlarge
+		Unenlarge,
+		EnlargeSideways,
+		UnenlargeSideways
 	}
 
 	public UICommonAnimation hoverAnimation;
 	public UICommonAnimation unhoverAnimation;
 	public UICommonAnimation pressAnimation;
 	public UICommonAnimation unpressAnimation;
+
+	public enum UIShowHideAnimation {
+		None,
+		RiseInFallOut,
+		ScaleInOutSideways
+	}
+
+	public UIShowHideAnimation showHideAnimation = UIShowHideAnimation.RiseInFallOut;
 
 	Queue<IEnumerator> animationQueue = new Queue<IEnumerator> ();
 	bool animationQueueWorkerAlive = false;
@@ -50,7 +60,7 @@ public class UIBase : MonoBehaviour {
 	public UIEventVoid OnPress;
 	public UIEventVoid OnUnpress;
 
-	protected bool hidden = false;
+	public bool hidden { get; protected set; }
 
 	protected virtual void Awake () {
 		graphicsElementsRaycastTargetable = new bool[graphicElements.Length];
@@ -137,24 +147,46 @@ public class UIBase : MonoBehaviour {
 		case UICommonAnimation.Unenlarge:
 			yield return A_Unenlarge ();
 			break;
+		case UICommonAnimation.EnlargeSideways:
+			yield return A_EnlargeSideways ();
+			break;
+		case UICommonAnimation.UnenlargeSideways:
+			yield return A_UnenlargeSideways ();
+			break;
 		}
 	}
 
 	//----------------------//
 
 	public void Show () {
-		foreach (UIBase element in GetComponentsInChildren<UIBase>()) {
-			if (!element.startHidden || element == this) {
-				element.StartCoroutine (element._Show ());
+		StartCoroutine (_Show ());
+		for(int i=0; i<transform.childCount;i++){
+			UIBase childElement = transform.GetChild (i).GetComponent<UIBase> ();
+			if (childElement && !childElement.startHidden) {
+				childElement.Show ();
 			}
 		}
 	}
 
 	IEnumerator _Show () {
 		SetElementsScale (1);
-		yield return A_RiseIn ();
-		hidden = false;
+		switch (showHideAnimation) {
+		case UIShowHideAnimation.RiseInFallOut:
+			yield return A_RiseIn ();
+			break;
+		case UIShowHideAnimation.ScaleInOutSideways:
+			yield return A_ScaleInSideways ();
+			break;
+		}
+		ShowImmediately ();
+	}
+
+	void ShowImmediately () {
 		SetElementsRaycastTargetable (true);
+		SetElementsAlpha (1);
+		SetElementsScale (1);
+		SetElementsOffset (Vector2.zero);
+		hidden = false;
 	}
 
 	public void Hide () {
@@ -164,15 +196,27 @@ public class UIBase : MonoBehaviour {
 	}
 
 	void HideImmediately () {
-		SetElementsRaycastTargetable (false);
-		SetElementsAlpha (0);
 		hidden = true;
+		SetElementsAlpha (0);
+		SetElementsScale (1);
+		SetElementsOffset (Vector2.zero);
+		SetElementsRaycastTargetable (false);
+		animationQueue.Clear ();
 	}
 
 	IEnumerator _Hide () {
 		hidden = true;
 		SetElementsRaycastTargetable (false);
-		yield return A_FallOut ();
+		animationQueue.Clear ();
+		switch (showHideAnimation) {
+		case UIShowHideAnimation.RiseInFallOut:
+			yield return A_FallOut ();
+			break;
+		case UIShowHideAnimation.ScaleInOutSideways:
+			yield return A_ScaleOutSideways ();
+			break;
+		}
+		HideImmediately ();
 	}
 
 	IEnumerator A_RiseIn () {
@@ -201,8 +245,32 @@ public class UIBase : MonoBehaviour {
 		SetElementsAlpha (0);
 	}
 
+	IEnumerator A_ScaleInSideways () {
+		SetElementsAlpha (1);
+		float lifetime = 0;
+		while (lifetime < AnimationDuration) {
+			float frac = animationCurve.Evaluate (lifetime / AnimationDuration);
+			SetElementsScale (new Vector2 (frac, 1));
+			yield return null;
+			lifetime += Time.deltaTime;
+		}
+		SetElementsScale (1);
+	}
+
+	IEnumerator A_ScaleOutSideways () {
+		float lifetime = 0;
+		while (lifetime < AnimationDuration) {
+			float frac = animationCurve.Evaluate (lifetime / AnimationDuration);
+			SetElementsScale (new Vector2 (1 - frac, 1));
+			yield return null;
+			lifetime += Time.deltaTime;
+		}
+		SetElementsScale (0);
+	}
+
 	//---------------------//
 
+	
 	IEnumerator A_BounceDown () {
 		float lifetime = 0;
 		while (lifetime < AnimationDuration) {
@@ -269,15 +337,31 @@ public class UIBase : MonoBehaviour {
 		SetElementsScale (1);
 	}
 
+	IEnumerator A_EnlargeSideways () {
+		float lifetime = 0;
+		while (lifetime < AnimationDuration) {
+			float frac = animationCurve.Evaluate (lifetime / AnimationDuration);
+			SetElementsScale (new Vector2 (1 + 0.1f * frac, 1));
+			yield return null;
+			lifetime += Time.deltaTime;
+		}
+		SetElementsScale (new Vector2 (1.1f, 1));
+	}
+
+	IEnumerator A_UnenlargeSideways () {
+		float lifetime = 0;
+		while (lifetime < AnimationDuration) {
+			float frac = animationCurve.Evaluate (lifetime / AnimationDuration);
+			SetElementsScale (new Vector2 (1 + 0.1f * (1 - frac), 1));
+			yield return null;
+			lifetime += Time.deltaTime;
+		}
+		SetElementsScale (1);
+	}
+
 	//--------//
 
 	protected void QueueAnimation (IEnumerator animation) {
-		// no duplicates
-//		foreach (IEnumerator a in animationQueue) {
-//			if (a.ToString () == animation.ToString ()) {
-//				return;
-//			}
-//		}
 		animationQueue.Enqueue (animation);
 		if (!animationQueueWorkerAlive) {
 			StartCoroutine (AnimationQueueWorker ());
@@ -287,7 +371,10 @@ public class UIBase : MonoBehaviour {
 	IEnumerator AnimationQueueWorker () {
 		animationQueueWorkerAlive = true;
 		while (animationQueue.Count > 0 && !hidden) {
-			yield return animationQueue.Dequeue ();
+			IEnumerator animation = animationQueue.Dequeue ();
+			while (animation.MoveNext () && !hidden) {
+				yield return animation.Current;
+			}
 		}
 		animationQueueWorkerAlive = false;
 	}
@@ -307,8 +394,12 @@ public class UIBase : MonoBehaviour {
 	}
 
 	protected void SetElementsScale (float scale) {
+		SetElementsScale (Vector2.one * scale);
+	}
+
+	protected void SetElementsScale (Vector2 scale) {
 		for (int i = 0; i < transformableElements.Length; i++) {
-			transformableElements [i].transform.localScale = new Vector3 (scale, scale, scale);
+			transformableElements [i].transform.localScale = new Vector3 (scale.x, scale.y, 1);
 		}
 	}
 

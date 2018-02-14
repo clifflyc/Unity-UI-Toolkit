@@ -7,10 +7,12 @@ public class UIImage : UIBase {
 
 	Image image;
 
-	protected virtual Sprite spriteElement { get { return image.sprite; } set { image.sprite = value; } }
+	public virtual Sprite spriteElement { get { return image.sprite; } set { image.sprite = value; } }
+	public virtual Color colorElement { get { return image.color; } set { image.color = value; } }
+	public virtual float fillAmount { get { return image.fillAmount; } set { image.fillAmount = value; } }
 
-	protected override void Start () {
-		base.Start ();
+	protected override void Awake () {
+		base.Awake();
 		foreach (Graphic graphic in graphicElements) {
 			if (graphic is Image) {
 				if (image) {

@@ -10,8 +10,8 @@ public class UIInput : UILabel {
 
 	public override string stringElement { get { return inputField.text; } set { inputField.text = value; } }
 
-	protected override void Start () {
-		base.Start ();
+	protected override void Awake () {
+		base.Awake ();
 		foreach (Graphic graphic in graphicElements) {
 			InputField inputField = graphic.GetComponent<InputField> ();
 			if (inputField) {
